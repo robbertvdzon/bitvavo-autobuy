@@ -6,9 +6,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-/*
- Run this code using: mvn compile exec:java -Dexec.mainClass="AutoBuy"
- */
 public class AutoBuy {
     private static final DecimalFormat DECIMAL_FORMAT = getDecimalFormat();
     private static final double SPARE_EUROS = 1;
@@ -21,7 +18,6 @@ public class AutoBuy {
         String secret = System.getenv("BITVAVO_SECRET");
         if (apiKey==null) fail("BITVAVO_API_KEY env is not set");
         if (secret==null) fail("BITVAVO_SECRET env is not set");
-
         Bitvavo bitvavo = new Bitvavo(new JSONObject("{" +
                 "APIKEY: '"+apiKey+"', " +
                 "APISECRET: '"+secret+"', " +
@@ -37,26 +33,32 @@ public class AutoBuy {
     }
 
     private void start() {
-        double euroBalance = getEuroBalance();
-        double btcBalance = getBtcBalance();
-        System.out.println("Current euro balance:"+euroBalance);
-        System.out.println("Current btc balance:"+btcBalance);
+        try {
+            double euroBalance = getEuroBalance();
+            double btcBalance = getBtcBalance();
+            System.out.println("Current euro balance:" + euroBalance);
+            System.out.println("Current btc balance:" + btcBalance);
 
-        if (euroBalance>MINIMUM_EUROS_AVAILABLE) {
-            double btcPriceD = getBtcPriceD();
-            String toBuyString = calculateAmountToBuy(euroBalance, btcPriceD);
-            System.out.println("Buying " + toBuyString+" bitcoin, for a price of : "+btcPriceD);
-            String buyResult = buyBtc(toBuyString);
-            double newEuroBalance = getEuroBalance();
-            double newBtcBalance = getBtcBalance();
-            System.out.println("New euro balance:"+newEuroBalance);
-            System.out.println("New btc balance:"+newBtcBalance);
-            System.out.println("\n\nBuy result:"+buyResult);
+            if (euroBalance > MINIMUM_EUROS_AVAILABLE) {
+                double btcPriceD = getBtcPriceD();
+                String toBuyString = calculateAmountToBuy(euroBalance, btcPriceD);
+                System.out.println("Buying " + toBuyString + " bitcoin, for a price of : " + btcPriceD);
+                String buyResult = buyBtc(toBuyString);
+                double newEuroBalance = getEuroBalance();
+                double newBtcBalance = getBtcBalance();
+                System.out.println("New euro balance:" + newEuroBalance);
+                System.out.println("New btc balance:" + newBtcBalance);
+                System.out.println("\n\nBuy result:" + buyResult);
+            } else {
+                System.out.println("Minimal " + MINIMUM_EUROS_AVAILABLE + " euro is needed for an automatic buy");
+                System.exit(1);
+            }
+            System.exit(0);
         }
-        else{
-            System.out.println("Minimal "+MINIMUM_EUROS_AVAILABLE+" euro is needed for an automatic buy");
+        catch (Exception e){
+            e.printStackTrace();
+            System.exit(50);
         }
-        System.exit(0);
     }
 
     private double getEuroBalance() {
